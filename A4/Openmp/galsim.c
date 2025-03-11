@@ -172,20 +172,16 @@ void get_force_on_body(const int nstars, const double G, const double e0, Vector
             
             accx -= factor_i * dx;
             accy -= factor_i * dy;
-            ACCx[j] += factor_j * dx;
-            ACCy[j] += factor_j * dy;
+            ACCx[j] += factor_j * G * dx;
+            ACCy[j] += factor_j * G * dy;
             
         }
-        ACCx[i] += accx;
-        ACCy[i] += accy;
+        ACCx[i] += accx * G;
+        ACCy[i] += accy * G;
     }
-    
+    // Took away the loop for that multiplies the acceleration by G
+    // Instead we multiply the acceleration by G in the loop in every iteration
 
-    #pragma omp parallel for num_threads(NUM_THREADS) schedule(static)
-    for (int i = 0; i < nstars; i++) {
-        ACCx[i] *= G;
-        ACCy[i] *= G;
-    }
 }
 
 // Function to calculate the acceleration of a body
