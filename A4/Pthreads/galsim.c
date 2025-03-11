@@ -98,17 +98,15 @@ void *simulation_thread(void *arg) {
         // Synchronize to ensure all threads have computed forces
         pthread_barrier_wait(&barrier);
         // Now miltiply by G after all threads have computed forces
-        if (tid == 0) {
-            for (int i = 0; i < nstars; i++) {
-                data->ACCx[i] = 0;
-                data->ACCy[i] = 0;
-                for (int j = 0; j < nthr; j++) {
-                    data->ACCx[i] += GACCx[i + (j * nstars)];
-                    data->ACCy[i] += GACCy[i + (j * nstars)];
-                }
-                data->ACCx[i] *= G;
-                data->ACCy[i] *= G;
+        for (int i = tid; i < nstars; i += nthr) {
+            double tmp_ACCx = 0.0;
+            double tmp_ACCy = 0.0;
+            for (int j = 0; j < nthr; j++) {
+                tmp_ACCx += GACCx[i + (j * nstars)];
+                tmp_ACCy += GACCy[i + (j * nstars)];
             }
+            data->ACCx[i] = tmp_ACCx * G;
+            data->ACCy[i] = tmp_ACCy * G;
         }
 
 
@@ -118,13 +116,13 @@ void *simulation_thread(void *arg) {
         
         // --- Update Velocities and Positions ---
         // Update velocities and positions of stars
-        if (tid == 0) {
-        for (int i = 0; i < nstars; i++) {
+        
+        for (int i = tid; i < nstars; i += nthr) {
             data->velocity[i].x += stepsize * data->ACCx[i];
             data->velocity[i].y += stepsize * data->ACCy[i];
             data->position[i].x += stepsize * data->velocity[i].x;
             data->position[i].y += stepsize * data->velocity[i].y;
-        }}
+        }
         // Synchronize to ensure all threads have finished updating before next timestep
         pthread_barrier_wait(&barrier);
         // This is the end of the timestep

@@ -151,7 +151,7 @@ void get_force_on_body(const int nstars, const double G, const double e0, Vector
         ACCx[i] = 0;
         ACCy[i] = 0;
     }
-    #pragma omp barrier
+    
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic) reduction(+:ACCx[:nstars], ACCy[:nstars])
     for (int i = 0; i < nstars; i++) {
@@ -179,7 +179,7 @@ void get_force_on_body(const int nstars, const double G, const double e0, Vector
         ACCx[i] += accx;
         ACCy[i] += accy;
     }
-    #pragma omp barrier
+    
 
     #pragma omp parallel for num_threads(NUM_THREADS) schedule(static)
     for (int i = 0; i < nstars; i++) {
