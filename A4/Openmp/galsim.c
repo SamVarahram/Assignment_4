@@ -5,7 +5,10 @@
 #include <stdbool.h>
 #include <math.h>
 #include <sys/time.h>
-#include <omp.h>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
+
 
 // Struct to store the position of a body
 typedef struct {
